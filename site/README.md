@@ -32,7 +32,13 @@ All times are in seconds (2 decimals). Timers pause while the browser tab is hid
 - Local test: `cd site && python3 -m http.server 8000`, then open <http://localhost:8000/>.
   Add `?debug=1` for a live timer panel.
   While `TEST_MODE` is on, the end page has **Download data (CSV)** and **Start over** buttons.
-- Hosting: GitHub Pages is the easiest option. Push the repo, then go to **Settings → Pages** and publish from the `site/` folder (or move it to `docs/`). Any static host works.
+- Hosting (GitHub Pages): `.github/workflows/pages.yml` publishes `site/` on every push to `main`.
+  One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+  The site is then at `https://y-anthonychen.github.io/selective_exposure/`.
+  Note: Pages on a **private** repo needs GitHub Pro (free for students and teachers via GitHub Education). The published site is public to anyone with the link.
+  Any other static host works too (e.g. Netlify): upload the `site/` folder.
+- Sharing with collaborators for testing: send `https://<site>/?debug=1`. Each tester gets a test ID and live timers, and can download their own CSV at the end.
+  Keep `TEST_MODE: true` and `DATA_ENDPOINT: ""` while testing.
 
 ## Settings (`CONFIG` at the top of `app.js`)
 | setting | now | before launch |
