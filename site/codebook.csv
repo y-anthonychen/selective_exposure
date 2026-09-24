@@ -1,0 +1,79 @@
+﻿variable,group,type,values,description
+pid,Participant,text,,Participant ID as confirmed on the ID page; use for matching and payment
+url_id,Participant,text,ID or blank,ID passed in the study link (PROLIFIC_PID / participantId / workerId / pid); differs from pid if participant edited it
+started_at,Session,timestamp (UTC),ISO 8601,When the study page was first opened in the tab
+finished_at,Session,timestamp (UTC),ISO 8601,When the participant clicked Finish
+total_ms,Session,integer (ms),>=0,"finished_at minus started_at; wall-clock, includes time in other tabs"
+user_agent,Device,text,,Browser/operating system string
+viewport_w,Device,integer (px),,Browser window width at finish
+viewport_h,Device,integer (px),,Browser window height at finish
+touch_device,Device,binary,"1=touch, 0=mouse",Primary input cannot hover (phone/tablet)
+set1_ms,Session,integer (ms),>=0,Active time in Part 1 (episode cards + Read More pages; excludes instructions)
+set2_ms,Session,integer (ms),>=0,Active time in Part 2 (episode cards + Read More pages; excludes instructions)
+set1_instructions_ms,Session,integer (ms),>=0,Active time on Part 1 instructions page
+set2_instructions_ms,Session,integer (ms),>=0,Active time on Part 2 instructions page
+set1_growth_episode,"Episode: Part 1, growth",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set1_growth_position,"Episode: Part 1, growth",integer,1-4,Display position within the part (1 = shown first)
+set1_growth_title_view_ms,"Episode: Part 1, growth",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set1_growth_title_views,"Episode: Part 1, growth",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set1_growth_readmore_clicked,"Episode: Part 1, growth",binary,"1=yes, 0=no",Opened Read More at least once
+set1_growth_readmore_clicks,"Episode: Part 1, growth",integer,>=0,Number of times Read More was opened
+set1_growth_readmore_ms,"Episode: Part 1, growth",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set1_growth_readmore_max_scroll_pct,"Episode: Part 1, growth",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set1_neutral_episode,"Episode: Part 1, neutral",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set1_neutral_position,"Episode: Part 1, neutral",integer,1-4,Display position within the part (1 = shown first)
+set1_neutral_title_view_ms,"Episode: Part 1, neutral",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set1_neutral_title_views,"Episode: Part 1, neutral",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set1_neutral_readmore_clicked,"Episode: Part 1, neutral",binary,"1=yes, 0=no",Opened Read More at least once
+set1_neutral_readmore_clicks,"Episode: Part 1, neutral",integer,>=0,Number of times Read More was opened
+set1_neutral_readmore_ms,"Episode: Part 1, neutral",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set1_neutral_readmore_max_scroll_pct,"Episode: Part 1, neutral",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set1_rejection_episode,"Episode: Part 1, rejection",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set1_rejection_position,"Episode: Part 1, rejection",integer,1-4,Display position within the part (1 = shown first)
+set1_rejection_title_view_ms,"Episode: Part 1, rejection",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set1_rejection_title_views,"Episode: Part 1, rejection",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set1_rejection_readmore_clicked,"Episode: Part 1, rejection",binary,"1=yes, 0=no",Opened Read More at least once
+set1_rejection_readmore_clicks,"Episode: Part 1, rejection",integer,>=0,Number of times Read More was opened
+set1_rejection_readmore_ms,"Episode: Part 1, rejection",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set1_rejection_readmore_max_scroll_pct,"Episode: Part 1, rejection",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set1_unwavering_episode,"Episode: Part 1, unwavering",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set1_unwavering_position,"Episode: Part 1, unwavering",integer,1-4,Display position within the part (1 = shown first)
+set1_unwavering_title_view_ms,"Episode: Part 1, unwavering",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set1_unwavering_title_views,"Episode: Part 1, unwavering",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set1_unwavering_readmore_clicked,"Episode: Part 1, unwavering",binary,"1=yes, 0=no",Opened Read More at least once
+set1_unwavering_readmore_clicks,"Episode: Part 1, unwavering",integer,>=0,Number of times Read More was opened
+set1_unwavering_readmore_ms,"Episode: Part 1, unwavering",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set1_unwavering_readmore_max_scroll_pct,"Episode: Part 1, unwavering",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set2_growth_episode,"Episode: Part 2, growth",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set2_growth_position,"Episode: Part 2, growth",integer,1-4,Display position within the part (1 = shown first)
+set2_growth_title_view_ms,"Episode: Part 2, growth",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set2_growth_title_views,"Episode: Part 2, growth",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set2_growth_readmore_clicked,"Episode: Part 2, growth",binary,"1=yes, 0=no",Opened Read More at least once
+set2_growth_readmore_clicks,"Episode: Part 2, growth",integer,>=0,Number of times Read More was opened
+set2_growth_readmore_ms,"Episode: Part 2, growth",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set2_growth_readmore_max_scroll_pct,"Episode: Part 2, growth",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set2_neutral_episode,"Episode: Part 2, neutral",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set2_neutral_position,"Episode: Part 2, neutral",integer,1-4,Display position within the part (1 = shown first)
+set2_neutral_title_view_ms,"Episode: Part 2, neutral",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set2_neutral_title_views,"Episode: Part 2, neutral",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set2_neutral_readmore_clicked,"Episode: Part 2, neutral",binary,"1=yes, 0=no",Opened Read More at least once
+set2_neutral_readmore_clicks,"Episode: Part 2, neutral",integer,>=0,Number of times Read More was opened
+set2_neutral_readmore_ms,"Episode: Part 2, neutral",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set2_neutral_readmore_max_scroll_pct,"Episode: Part 2, neutral",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set2_rejection_episode,"Episode: Part 2, rejection",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set2_rejection_position,"Episode: Part 2, rejection",integer,1-4,Display position within the part (1 = shown first)
+set2_rejection_title_view_ms,"Episode: Part 2, rejection",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set2_rejection_title_views,"Episode: Part 2, rejection",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set2_rejection_readmore_clicked,"Episode: Part 2, rejection",binary,"1=yes, 0=no",Opened Read More at least once
+set2_rejection_readmore_clicks,"Episode: Part 2, rejection",integer,>=0,Number of times Read More was opened
+set2_rejection_readmore_ms,"Episode: Part 2, rejection",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set2_rejection_readmore_max_scroll_pct,"Episode: Part 2, rejection",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+set2_unwavering_episode,"Episode: Part 2, unwavering",text,growth_1..unwavering_2,Episode shown for this condition in this part (see CODEBOOK.md section 3)
+set2_unwavering_position,"Episode: Part 2, unwavering",integer,1-4,Display position within the part (1 = shown first)
+set2_unwavering_title_view_ms,"Episode: Part 2, unwavering",integer (ms),>=0,"Title reading time: total active time the episode card was on screen, all visits; excludes Read More time"
+set2_unwavering_title_views,"Episode: Part 2, unwavering",integer,>=1,"Number of times the card was displayed (first view, Previous, return from Read More)"
+set2_unwavering_readmore_clicked,"Episode: Part 2, unwavering",binary,"1=yes, 0=no",Opened Read More at least once
+set2_unwavering_readmore_clicks,"Episode: Part 2, unwavering",integer,>=0,Number of times Read More was opened
+set2_unwavering_readmore_ms,"Episode: Part 2, unwavering",integer (ms),>=0,"Total active time on the Read More page, all visits; 0 if never opened"
+set2_unwavering_readmore_max_scroll_pct,"Episode: Part 2, unwavering",integer (%),0-100,"Furthest point of the full description on screen, max across visits; 0 if never opened"
+detail_json,Raw log,JSON text,,"Display order, unrounded metrics, per-visit Read More log, and event timeline (see CODEBOOK.md section 4)"
