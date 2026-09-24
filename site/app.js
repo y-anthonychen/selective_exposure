@@ -4,10 +4,12 @@
  *       shown one at a time) -> Set 2 (the other 4, random order) -> finish.
  *
  * Per episode we record:
- *   title_view_ms    time that episode's title card was on screen (tab in focus)
+ *   title_view_sec   time that episode's title card was on screen (tab in focus)
  *   title_views      how many times the participant landed on that card
  *   readmore_clicks  number of times "Read More" was opened (clicked = clicks > 0)
- *   readmore_ms      total time spent on the Read More page
+ *   readmore_sec     total time spent on the Read More page
+ *   share_clicks     number of times "Share" was clicked (card or Read More page)
+ * Timers count in ms internally; every exported time is in seconds (2 decimals).
  * All timers pause while the browser tab is hidden.
  */
 
@@ -33,6 +35,12 @@ const CONFIG = {
   // Minimum seconds on each episode card before "Next" is enabled (0 = none).
   MIN_SECONDS_PER_EPISODE: 0,
 
+  // Pop-up shown when a participant clicks "Share" (nothing is actually shared).
+  SHARE_MESSAGE: {
+    title: "Thanks for your interest in sharing this episode!",
+    body: "Sharing isn’t available during this study, but we’ve noted that you wanted to share it.",
+  },
+
   // Shown on a standalone page before each part. HTML is allowed.
   INSTRUCTIONS: {
     set1: `<p class="placeholder">[INSTRUCTION: needs to be updated]</p>
@@ -44,7 +52,7 @@ const CONFIG = {
 
 const CONDITIONS = ["growth", "neutral", "rejection", "unwavering"];
 const SETS = ["set1", "set2"];
-const STORAGE_KEY = "cwh_state_v3";
+const STORAGE_KEY = "cwh_state_v5";
 const params = new URLSearchParams(location.search);
 const DEBUG = params.has("debug");
 const byId = Object.fromEntries(window.EPISODES.map((e) => [e.id, e]));
@@ -72,7 +80,7 @@ function newState() {
   for (const [set, ids] of [["set1", set1], ["set2", set2]]) {
     metrics[set] = {};
     for (const id of ids) {
-      metrics[set][id] = { title_view_ms: 0, title_views: 0, readmore_clicks: 0, readmore_ms: 0, readmore_visits: [] };
+      metrics[set][id] = { title_view_ms: 0, title_views: 0, readmore_clicks: 0, readmore_ms: 0, readmore_visits: [], share_clicks: 0 };
     }
   }
   return {
@@ -107,8 +115,11 @@ function save() {
   try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
 }
 
+// Milliseconds -> seconds, 2 decimals.
+const sec = (ms) => Math.round(ms / 10) / 100;
+
 function logEvent(type, extra = {}) {
-  state.events.push({ t_ms: Date.now() - t0, type, set: state.current, ...extra });
+  state.events.push({ t_sec: sec(Date.now() - t0), type, set: state.current, ...extra });
 }
 
 // ---------------------------------------------------------------- timers ---
@@ -157,6 +168,7 @@ function h(tag, attrs = {}, html = "") {
 }
 
 function route() {
+  closeShare();
   teardown();
   teardown = () => {};
   window.scrollTo(0, 0);
@@ -247,7 +259,10 @@ function renderEpisode() {
         <p class="eyebrow">Camp Wild Heart · Podcast</p>
         <h2 class="episode-title">${ep.title}</h2>
         <p class="episode-summary">${ep.summary}</p>
-        <a class="read-more" href="#/ep/${id}">Read More <span aria-hidden="true">→</span></a>
+        <div class="episode-actions">
+          <a class="read-more" href="#/ep/${id}">Read More <span aria-hidden="true">→</span></a>
+          ${SHARE_BUTTON}
+        </div>
       </div>
     </article>
     <nav class="nav">
@@ -279,6 +294,7 @@ function renderEpisode() {
   };
   link.addEventListener("click", open);
   link.addEventListener("auxclick", open);
+  app.querySelector(".share-btn").addEventListener("click", () => openShare(set, id, "card", [titleTimer]));
 
   app.querySelector("#prev").addEventListener("click", () => {
     state.pos[set] = i - 1;
@@ -303,6 +319,56 @@ function renderEpisode() {
   };
 }
 
+// ----------------------------------------------------------------- share ---
+// A mock share button: it only opens a thank-you pop-up and records the click.
+const SHARE_BUTTON = `
+  <button class="share-btn" type="button">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+      <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
+    </svg>
+    Share
+  </button>`;
+
+let closeShare = () => {};
+
+// `paused` timers (title or Read More reading time) stop while the pop-up is open.
+function openShare(set, id, from, paused) {
+  const mm = state.metrics[set][id];
+  mm.share_clicks += 1;
+  logEvent("share_open", { episode: id, condition: byId[id].condition, from });
+  paused.forEach((t) => t.set(false));
+  const opened = performance.now();
+
+  const overlay = h("div", { class: "modal-backdrop" });
+  overlay.innerHTML = `
+    <div class="modal panel" role="dialog" aria-modal="true" aria-labelledby="share-title">
+      <div class="modal-icon" aria-hidden="true">✓</div>
+      <h2 id="share-title">${CONFIG.SHARE_MESSAGE.title}</h2>
+      <p class="muted">${CONFIG.SHARE_MESSAGE.body}</p>
+      <button class="btn" type="button">Close</button>
+    </div>`;
+  document.body.append(overlay);
+  const btn = overlay.querySelector(".btn");
+  btn.focus();
+
+  const onKey = (e) => e.key === "Escape" && closeShare();
+  document.addEventListener("keydown", onKey);
+  btn.addEventListener("click", () => closeShare());
+  overlay.addEventListener("click", (e) => e.target === overlay && closeShare());
+
+  closeShare = () => {
+    closeShare = () => {};
+    overlay.remove();
+    document.removeEventListener("keydown", onKey);
+    logEvent("share_close", { episode: id, from, popup_sec: sec(performance.now() - opened) });
+    paused.forEach((t) => timers.has(t) && t.set(true));
+    save();
+  };
+  save();
+}
+
 function renderReadMore(id) {
   const set = state.current;
   const ep = byId[id];
@@ -319,6 +385,7 @@ function renderReadMore(id) {
           <p class="eyebrow">Camp Wild Heart · Episode details</p>
           <h1 class="episode-title">${ep.title}</h1>
         </div>
+        ${SHARE_BUTTON}
       </div>
       <div class="episode-body">${ep.body.map((p) => `<p>${p}</p>`).join("")}</div>
     </article>
@@ -328,6 +395,7 @@ function renderReadMore(id) {
   const thisVisit = new Timer(visit, "ms");
   const setTimer = new Timer(state.set_ms, set);
   [total, thisVisit, setTimer].forEach((t) => t.set(true));
+  app.querySelector(".share-btn").addEventListener("click", () => openShare(set, id, "readmore", [total, thisVisit]));
 
   const body = app.querySelector(".episode-body");
   const onScroll = () => {
@@ -341,7 +409,7 @@ function renderReadMore(id) {
   teardown = () => {
     [total, thisVisit, setTimer].forEach((t) => t.dispose());
     window.removeEventListener("scroll", onScroll);
-    logEvent("readmore_close", { episode: id, visit_ms: Math.round(visit.ms) });
+    logEvent("readmore_close", { episode: id, visit_sec: sec(visit.ms) });
     save();
   };
 }
@@ -353,15 +421,15 @@ function flatRecord() {
     url_id: state.url_id,
     started_at: state.started_at,
     finished_at: state.finished_at || "",
-    total_ms: state.finished_at ? Date.parse(state.finished_at) - t0 : "",
+    total_sec: state.finished_at ? sec(Date.parse(state.finished_at) - t0) : "",
     user_agent: navigator.userAgent,
     viewport_w: window.innerWidth,
     viewport_h: window.innerHeight,
     touch_device: matchMedia("(hover: none)").matches ? 1 : 0,
-    set1_ms: Math.round(state.set_ms.set1),
-    set2_ms: Math.round(state.set_ms.set2),
-    set1_instructions_ms: Math.round(state.intro_ms.set1),
-    set2_instructions_ms: Math.round(state.intro_ms.set2),
+    set1_sec: sec(state.set_ms.set1),
+    set2_sec: sec(state.set_ms.set2),
+    set1_instructions_sec: sec(state.intro_ms.set1),
+    set2_instructions_sec: sec(state.intro_ms.set2),
   };
   for (const set of SETS) {
     // Fixed column order (growth, neutral, rejection, unwavering) regardless of display order.
@@ -371,15 +439,29 @@ function flatRecord() {
       const p = `${set}_${cond}_`;
       r[p + "episode"] = id;
       r[p + "position"] = state.order[set].indexOf(id) + 1;
-      r[p + "title_view_ms"] = Math.round(m.title_view_ms);
+      r[p + "title_view_sec"] = sec(m.title_view_ms);
       r[p + "title_views"] = m.title_views;
       r[p + "readmore_clicked"] = m.readmore_clicks > 0 ? 1 : 0;
       r[p + "readmore_clicks"] = m.readmore_clicks;
-      r[p + "readmore_ms"] = Math.round(m.readmore_ms);
+      r[p + "readmore_sec"] = sec(m.readmore_ms);
       r[p + "readmore_max_scroll_pct"] = Math.max(0, ...m.readmore_visits.map((v) => v.max_scroll_pct));
+      r[p + "share_clicked"] = m.share_clicks > 0 ? 1 : 0;
+      r[p + "share_clicks"] = m.share_clicks;
     });
   }
-  r.detail_json = JSON.stringify({ order: state.order, metrics: state.metrics, events: state.events });
+  const metrics = {};
+  for (const set of SETS) {
+    metrics[set] = {};
+    for (const [id, m] of Object.entries(state.metrics[set])) {
+      metrics[set][id] = {
+        title_view_sec: sec(m.title_view_ms), title_views: m.title_views,
+        readmore_clicks: m.readmore_clicks, readmore_sec: sec(m.readmore_ms),
+        readmore_visits: m.readmore_visits.map((v) => ({ opened_at: v.opened_at, sec: sec(v.ms), max_scroll_pct: v.max_scroll_pct })),
+        share_clicks: m.share_clicks,
+      };
+    }
+  }
+  r.detail_json = JSON.stringify({ order: state.order, metrics, events: state.events });
   return r;
 }
 
@@ -453,7 +535,7 @@ if (DEBUG) {
     const s = (x) => (x / 1000).toFixed(1).padStart(6);
     const rows = state.order[set].map((id) => {
       const m = state.metrics[set][id];
-      return `${id.padEnd(13)} title${s(m.title_view_ms)}s  RM×${m.readmore_clicks} ${s(m.readmore_ms)}s`;
+      return `${id.padEnd(13)} title${s(m.title_view_ms)}s  RM×${m.readmore_clicks} ${s(m.readmore_ms)}s  share×${m.share_clicks}`;
     });
     panel.textContent = `pid=${state.pid || "-"}  ${state.current}  ${set} ${s(state.set_ms[set])}s\n` + rows.join("\n");
   }, 300);

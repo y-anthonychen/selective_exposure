@@ -5,7 +5,7 @@ A static website (plain HTML/CSS/JS with no build step) that simulates the Camp 
 ## Flow
 1. **ID page**: the participant confirms their Prolific or CloudResearch ID. It is pre-filled from the URL when available.
 2. **Part 1**: 4 episodes, one from each condition (growth, neutral, rejection, unwavering), in random order and **shown one at a time**.
-   Each episode has a **Read More** link that opens the full description, and a Previous / Next button.
+   Each episode has a **Read More** link that opens the full description, a mock **Share** button that shows a thank-you pop-up, and Previous / Next buttons.
 3. **Part 2**: the other episode from each condition, in a new random order.
 4. **Finish**: the data is sent, and the participant sees a thank-you page or is redirected back to Prolific or CloudResearch.
 
@@ -17,15 +17,16 @@ For each `set1`/`set2` × `growth`/`neutral`/`rejection`/`unwavering`:
 | column | meaning |
 |---|---|
 | `setN_<cond>_episode` / `_position` | which episode was shown and at what position (1–4) |
-| `_title_view_ms` | total time that episode's title card was on screen (**title reading time**) |
+| `_title_view_sec` | total time that episode's title card was on screen (**title reading time**) |
 | `_title_views` | how many times they landed on that card (returning via Previous or from Read More counts again) |
 | `_readmore_clicked` | 1 if they opened Read More at least once |
 | `_readmore_clicks` | number of times Read More was opened |
-| `_readmore_ms` | total time on the Read More page |
+| `_readmore_sec` | total time on the Read More page |
 | `_readmore_max_scroll_pct` | how far down the full description they scrolled |
+| `_share_clicked` / `_share_clicks` | whether / how often they clicked the mock **Share** button (card or Read More page) |
 
-The record also includes `pid` (the confirmed ID), `url_id` (the ID from the URL, to catch typos), `set1_ms`/`set2_ms`, device info, and `detail_json`, a full timestamped event log.
-All timers pause while the browser tab is hidden.
+The record also includes `pid` (the confirmed ID), `url_id` (the ID from the URL, to catch typos), `set1_sec`/`set2_sec`, device info, and `detail_json`, a full timestamped event log.
+All times are in seconds (2 decimals). Timers pause while the browser tab is hidden.
 
 ## Running it
 - Local test: `cd site && python3 -m http.server 8000`, then open <http://localhost:8000/>.
@@ -40,6 +41,7 @@ All timers pause while the browser tab is hidden.
 | `DATA_ENDPOINT` | `""` (nothing sent) | your Google Apps Script URL |
 | `REDIRECT_URL` | `""` (thank-you page) | Prolific completion URL, e.g. `https://app.prolific.com/submissions/complete?cc=XXXX` |
 | `MIN_SECONDS_PER_EPISODE` | `0` | e.g. `5` so Next is disabled for the first 5 seconds on each episode |
+| `SHARE_MESSAGE` | thank-you pop-up text | your wording |
 | `INSTRUCTIONS` | placeholder text | your wording |
 
 **Study URL to give Prolific:** `https://<your-site>/?PROLIFIC_PID={{%PROLIFIC_PID%}}`
